@@ -1,0 +1,31 @@
+{
+  "name": "aweitian/sqlBuilder",
+  "description": "SQL QUERY BUILDER",
+  "type": "project",
+  "keywords": [
+    "aweitian",
+    "tiananwei",
+    "sqlBuilder"
+  ],
+  "homepage": "https://github.com/aweitian/sqlBuilder",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "awei.tian@qq.com",
+      "email": "531164479@qq.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "require-dev": {
+        "phpunit/phpunit": "~5.0"
+  },
+  "autoload": {
+    "files": [],
+    "psr-4": {
+      "Tian\\SqlBuild\\": "src/"
+    }
+  }
+}
