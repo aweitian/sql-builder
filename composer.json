@@ -1,13 +1,13 @@
 {
-  "name": "aweitian/sqlBuilder",
+  "name": "aweitian/sql-builder",
   "description": "SQL QUERY BUILDER",
   "type": "project",
   "keywords": [
     "aweitian",
     "tiananwei",
-    "sqlBuilder"
+    "sql Builder"
   ],
-  "homepage": "https://github.com/aweitian/sqlBuilder",
+  "homepage": "https://github.com/aweitian/sql-builder",
   "license": "MIT",
   "authors": [
     {
