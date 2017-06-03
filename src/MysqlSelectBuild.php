@@ -47,69 +47,69 @@ class MysqlSelectBuild extends SqlBuild {
 		if ($value !== false) {
 			$this->bindValue ( $field, $value );
 		}
-		return $this->bindExpr ( 'field', $expr);
+		return $this->bindExpr ( 'field', $expr );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindJoinExpr($expr, $bind = []) {
+	public function bindJoin($expr, $bind = []) {
 		return $this->bindExpr ( 'join', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindWhereExpr($expr, $bind = []) {
+	public function bindWhere($expr, $bind = []) {
 		return $this->bindExpr ( 'where', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindGroupByExpr($expr, $bind = []) {
+	public function bindGroupBy($expr, $bind = []) {
 		return $this->bindExpr ( 'groupBy', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindHavingExpr($expr, $bind = []) {
+	public function bindHaving($expr, $bind = []) {
 		return $this->bindExpr ( 'having', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindOrderByExpr($expr, $bind = []) {
+	public function bindOrderBy($expr, $bind = []) {
 		return $this->bindExpr ( 'orderBy', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindLimitExpr($expr, $bind = []) {
+	public function bindLimit($expr, $bind = []) {
 		return $this->bindExpr ( 'limit', $expr, $bind );
 	}
 	/**
 	 *
-	 * @param string $expr
-	 * @param array $bind
+	 * @param string $expr        	
+	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\MysqlSelectBuild
 	 */
-	public function bindLockExpr($expr, $bind = []) {
+	public function bindLock($expr, $bind = []) {
 		return $this->bindExpr ( 'lock', $expr, $bind );
 	}
 }

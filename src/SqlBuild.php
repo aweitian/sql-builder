@@ -34,17 +34,20 @@ abstract class SqlBuild {
 	 * 如果第二个是数字或者字符串，则BIND KEY为EXPR,参数二为BIND VALUE
 	 * 其它只绑定表达表，不绑定值
 	 * 绑定表达式 bindExpr("where","concat('%',:key,'%')")
-	 *
-	 * @param string $name
-	 * @param string $expr
+	 * bind参数为key=>value形式，可以多个
+	 * 
+	 * 
+	 * @param string $name        	
+	 * @param string $expr        	
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
 	protected function bindExpr($name, $expr, $bind = []) {
 		if (! isset ( $this->expr [$name] ))
 			$this->expr [$name] = [ ];
 		$this->expr [$name] [] = $expr;
-		if (is_array ( $bind ) && count ( $bind ) == 2)
-			$this->bindValue ( $bind [0], $bind [1] );
+		if (is_array ( $bind ))
+			foreach ( $bind as $bk => $bv )
+				$this->bindValue ( $bk, $bv );
 		else if (is_string ( $bind ) || is_numeric ( $bind ))
 			$this->bindValue ( $expr, $bind );
 		return $this;
@@ -64,7 +67,6 @@ abstract class SqlBuild {
 		$this->value [$key] = $val;
 		return $this;
 	}
-	
 	protected function getBindExprs($name) {
 		// support since php 5.3
 		return isset ( $this->expr [$name] ) ? $this->expr [$name] : [ ];
