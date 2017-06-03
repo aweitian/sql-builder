@@ -17,13 +17,28 @@ class MysqlReplaceBuild extends SqlBuild {
 	}
 	/**
 	 *
-	 * @param string $field
-	 * @param string $expr 默认值为 :$field,如果要传递，FIELD前面需要带:
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @param string $field        	
+	 * @param string $value        	
+	 * @return \Tian\SqlBuild\MysqlReplaceBuild
 	 */
-	public function bindFieldExpr($field, $expr = '') {
-		if (! $expr) {
-			$expr = ':' . $field;
+	public function bindField($field, $value = false) {
+		$expr = ':' . $field;
+		$this->bindExpr ( 'values', $expr );
+		if ($value !== false) {
+			$this->bindValue ( $field, $value );
+		}
+		return $this->bindExpr ( 'field', $field );
+	}
+	/**
+	 *
+	 * @param string $field        	
+	 * @param string $expr        	
+	 * @param string $value        	
+	 * @return \Tian\SqlBuild\MysqlReplaceBuild
+	 */
+	public function bindFieldExpr($field, $expr, $value = false) {
+		if ($value !== false) {
+			$this->bindValue ( $field, $value );
 		}
 		$this->bindExpr ( 'values', $expr );
 		return $this->bindExpr ( 'field', $field );

@@ -30,19 +30,27 @@ abstract class SqlBuild {
 	}
 	
 	/**
+	 * 第二个参数如果是数组，需要第一个长度为BIND KEY,第二个为BIND VALUE
+	 * 如果第二个是数字或者字符串，则BIND KEY为EXPR,参数二为BIND VALUE
+	 * 其它只绑定表达表，不绑定值
 	 * 绑定表达式 bindExpr("where","concat('%',:key,'%')")
 	 *
-	 * @param
-	 *        	$name
-	 * @param
-	 *        	$expr
+	 * @param string $name
+	 * @param string $expr
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
-	protected function bindExpr($name, $expr) {
+	protected function bindExpr($name, $expr, $bind = []) {
 		if (! isset ( $this->expr [$name] ))
 			$this->expr [$name] = [ ];
 		$this->expr [$name] [] = $expr;
+		if (is_array ( $bind ) && count ( $bind ) == 2)
+			$this->bindValue ( $bind [0], $bind [1] );
+		else if (is_string ( $bind ) || is_numeric ( $bind ))
+			$this->bindValue ( $expr, $bind );
 		return $this;
+	}
+	public function getBindValue() {
+		return $this->value;
 	}
 	/**
 	 * 绑定实参 bindValue( "key", "lol")
@@ -53,9 +61,10 @@ abstract class SqlBuild {
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
 	public function bindValue($key, $val) {
-		$this->bind [$key] = $val;
+		$this->value [$key] = $val;
 		return $this;
 	}
+	
 	protected function getBindExprs($name) {
 		// support since php 5.3
 		return isset ( $this->expr [$name] ) ? $this->expr [$name] : [ ];
