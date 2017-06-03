@@ -51,7 +51,7 @@ class MysqlUpdateBuild extends SqlBuild {
 	 * @param array $bind
 	 * @return \Tian\SqlBuild\MysqlUpdateBuild
 	 */
-	public function bindWhereExpr($expr, $bind = []) {
+	public function bindWhere ($expr, $bind = []) {
 		return $this->bindExpr ( 'where', $expr, $bind );
 	}
 	/**
@@ -60,7 +60,7 @@ class MysqlUpdateBuild extends SqlBuild {
 	 * @param array $bind
 	 * @return \Tian\SqlBuild\MysqlUpdateBuild
 	 */
-	public function bindOrderByExpr($expr, $bind = []) {
+	public function bindOrderBy ($expr, $bind = []) {
 		return $this->bindExpr ( 'orderBy', $expr, $bind );
 	}
 	/**
@@ -69,7 +69,7 @@ class MysqlUpdateBuild extends SqlBuild {
 	 * @param array $bind
 	 * @return \Tian\SqlBuild\MysqlUpdateBuild
 	 */
-	public function bindLimitExpr($expr, $bind = []) {
+	public function bindLimit ($expr, $bind = []) {
 		return $this->bindExpr ( 'limit', $expr, $bind );
 	}
 }
