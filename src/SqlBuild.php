@@ -7,7 +7,7 @@
  */
 namespace Tian\SqlBuild;
 
-abstract class SqlBuild {
+class SqlBuild {
 	protected $table;
 	protected $expr = [ ];
 	/**
@@ -18,15 +18,193 @@ abstract class SqlBuild {
 	protected $value = [ ];
 	/**
 	 *
-	 * @return sql string
-	 */
-	abstract public function sql();
-	/**
-	 *
 	 * @param string $table        	
 	 */
 	public function __construct($table) {
 		$this->table = $table;
+	}
+	/**
+	 *
+	 * @return sql string
+	 */
+	public function select() {
+		return strtr ( 'SELECT field FROM table join where groupBy having orderBy limit lock', [ 
+				'field' => $this->parseField (),
+				'table' => $this->parseTable (),
+				' join' => $this->parseJoin (),
+				' where' => $this->parseWhere (),
+				' groupBy' => $this->parseGroupBy (),
+				' having' => $this->parseHaving (),
+				' orderBy' => $this->parseOrderBy (),
+				' limit' => $this->parseLimit (),
+				' lock' => $this->parseLock () 
+		] );
+	}
+	/**
+	 *
+	 * @return sql string
+	 */
+	public function delete() {
+		// 判断是单表还是多表
+		$table = $this->parseTable ();
+		if (strpos ( $table, ',' ) !== false) {
+			return strtr ( "DELETE FROM table using where orderBy limit", [ 
+					'table' => $table,
+					' using' => $this->parseUsing (),
+					' where' => $this->parseWhere (),
+					' orderBy' => '',
+					' limit' => '' 
+			] );
+		} else {
+			return strtr ( "DELETE FROM table using where orderBy limit", [ 
+					'table' => $table,
+					' using' => $this->parseUsing (),
+					' where' => $this->parseWhere (),
+					' orderBy' => $this->parseOrderBy (),
+					' limit' => $this->parseLimit () 
+			] );
+		}
+	}
+	/**
+	 *
+	 * @return sql string
+	 */
+	public function insert() {
+		return strtr ( "INSERT INTO table (field) VALUES (values)", [ 
+				'table' => $this->parseTable (),
+				'field' => $this->parseField (),
+				'values' => $this->parseValues () 
+		] );
+	}
+	/**
+	 *
+	 * @return sql string
+	 */
+	public function update() {
+		return strtr ( "UPDATE table set where orderBy limit", [ 
+				'table' => $this->parseTable (),
+				'set' => $this->parseSet (),
+				' where' => $this->parseWhere (),
+				' orderBy' => $this->parseOrderBy (),
+				' limit' => $this->parseLimit () 
+		] );
+	}
+	/**
+	 *
+	 * @return sql string
+	 */
+	public function replace() {
+		return strtr ( "REPLACE INTO table (field) VALUES (values)", [ 
+				'table' => $this->parseTable (),
+				'field' => $this->parseField (),
+				'values' => $this->parseValues () 
+		] );
+	}
+	/**
+	 *
+	 * @param string $field        	
+	 * @param string $value        	
+	 * @param string $values用于INSERT,UPDATE,REPLACE语句中的VALUES，:AAA        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindField($field, $value = false, $values = false) {
+		if ($values !== false) {
+			$this->bindExpr ( 'values', $values );
+		}
+		if ($value !== false) {
+			return $this->bindExpr ( 'field', $field, $value );
+		}
+		
+		return $this->bindExpr ( 'field', $field );
+	}
+	/**
+	 * 前面必须带:,为了干净的代码
+	 * bindValues(":field",'test")
+	 *
+	 * @param string $field        	
+	 * @param string $value        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindValues($field, $value = false) {
+		if ($value !== false) {
+			$this->bindValue ( $field, $value );
+		}
+		return $this->bindExpr ( 'values', $field );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindJoin($expr, $bind = []) {
+		return $this->bindExpr ( 'join', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindWhere($expr, $bind = []) {
+		return $this->bindExpr ( 'where', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindGroupBy($expr, $bind = []) {
+		return $this->bindExpr ( 'groupBy', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindHaving($expr, $bind = []) {
+		return $this->bindExpr ( 'having', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindOrderBy($expr, $bind = []) {
+		return $this->bindExpr ( 'orderBy', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindLimit($expr, $bind = []) {
+		return $this->bindExpr ( 'limit', $expr, $bind );
+	}
+	/**
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindLock($expr, $bind = []) {
+		return $this->bindExpr ( 'lock', $expr, $bind );
+	}
+	
+	/**
+	 *
+	 * @see \Tian\SqlBuild\SqlBuild::bindExpr
+	 *
+	 * @param string $expr        	
+	 * @param array $bind        	
+	 * @return \Tian\SqlBuild\SqlBuild
+	 */
+	public function bindUsing($expr, $bind = []) {
+		return $this->bindExpr ( 'using', $expr, $bind );
 	}
 	
 	/**
@@ -35,8 +213,8 @@ abstract class SqlBuild {
 	 * 其它只绑定表达表，不绑定值
 	 * 绑定表达式 bindExpr("where","concat('%',:key,'%')")
 	 * bind参数为key=>value形式，可以多个
-	 * 
-	 * 
+	 *
+	 *
 	 * @param string $name        	
 	 * @param string $expr        	
 	 * @return \Tian\SqlBuild\SqlBuild
