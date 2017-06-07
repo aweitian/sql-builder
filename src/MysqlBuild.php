@@ -7,7 +7,7 @@
  */
 namespace Tian\SqlBuild;
 
-class SqlBuild {
+class MysqlBuild {
 	protected $table;
 	protected $expr = [ ];
 	/**
