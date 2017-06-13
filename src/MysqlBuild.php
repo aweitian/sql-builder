@@ -7,7 +7,9 @@
  */
 namespace Tian\SqlBuild;
 
-class SqlBuild {
+use \Tian\Base\Arr as Arr;
+
+class MysqlBuild {
 	protected $table;
 	protected $expr = [ ];
 	/**
@@ -16,6 +18,12 @@ class SqlBuild {
 	 * @var array
 	 */
 	protected $value = [ ];
+	/**
+	 * 路径 =》 OR | AND
+	 *
+	 * @var array
+	 */
+	protected $whereType = [ ];
 	/**
 	 *
 	 * @param string $table        	
@@ -146,8 +154,16 @@ class SqlBuild {
 	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
-	public function bindWhere($expr, $bind = []) {
-		return $this->bindExpr ( 'where', $expr, $bind );
+	public function bindWhere($expr, $bind = [], $path = null, $type = 'and') {
+		$name = 'where';
+		if (! isset ( $this->expr [$name] ))
+			$this->expr [$name] = [ ];
+		$v = & Arr::ref ( $this->expr [$name], $path );
+		$t = & Arr::ref ( $this->whereType, $path );
+		$t = $type;
+		$v = $expr;
+		$this->bindValue ( $bind );
+		return $this;
 	}
 	/**
 	 *
@@ -235,14 +251,18 @@ class SqlBuild {
 	}
 	/**
 	 * 绑定实参 bindValue( "key", "lol")
-	 *
+	 * bindValue([])
+	 * 
 	 * @param string $name        	
 	 * @param string $key        	
 	 * @param object $val        	
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
 	public function bindValue($key, $val) {
-		$this->value [$key] = $val;
+		if (is_array ( $key ))
+			$this->value = array_merge ( $this->value, $key );
+		else if (is_string ( $key ) || is_numeric ( $key ))
+			$this->value [$key] = $val;
 		return $this;
 	}
 	protected function getBindExprs($name) {
@@ -257,6 +277,7 @@ class SqlBuild {
 	public function reset() {
 		$this->bind = [ ];
 		$this->expr = [ ];
+		$this->whereType = [ ];
 		return $this;
 	}
 	protected function parseTable() {
