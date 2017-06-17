@@ -36,6 +36,30 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		], $demo->getBindValue () );
 		// var_dump($demo->getBindValue());
 	}
+	public function testOrSelectjoin() {
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
+		$demo->bindField ( "id" );
+		$demo->bindField ( "concat('%',:lol,'%')", [ 
+				"lol" => "lol_value" 
+		] );
+		$demo->bindField ( "name as n" );
+		$demo->bindJoin ( 'left join tba on tba.sid = tablename.hid' );
+		$demo->bindJoin ( 'left join tbb on tba.sid = tbb.sid' );
+		$demo->bindWhere ( 'tablename.sid > :sid', [ 
+				'sid' => '100' 
+		] );
+		$demo->bindWhere ( 'tablename.name = :name', [ 
+				'name' => 'name_search' 
+		] );
+		$demo->orWhere();
+		$this->assertEquals ( "SELECT id,concat('%',:lol,'%'),name as n FROM tablename left join tba on tba.sid = tablename.hid left join tbb on tba.sid = tbb.sid WHERE tablename.sid > :sid OR tablename.name = :name", $demo->select () );
+		$this->assertArraySubset ( [ 
+				"lol" => "lol_value",
+				"sid" => "100",
+				"name" => "name_search" 
+		], $demo->getBindValue () );
+		// var_dump($demo->getBindValue());
+	}
 	public function testSelectGrpBy() {
 		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( "id" );
