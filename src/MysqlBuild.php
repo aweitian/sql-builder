@@ -8,8 +8,6 @@
  */
 namespace Tian\SqlBuild;
 
-use phpDocumentor\Reflection\Types\Null_;
-
 class MysqlBuild {
 	protected $table;
 	protected $expr = [ ];
@@ -297,6 +295,7 @@ class MysqlBuild {
 	public function reset() {
 		$this->bind = [ ];
 		$this->expr = [ ];
+		$this->whereCondition = ' AND ';
 		return $this;
 	}
 	protected function parseTable() {
