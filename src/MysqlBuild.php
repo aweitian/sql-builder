@@ -17,6 +17,7 @@ class MysqlBuild {
 	 * @var array
 	 */
 	protected $value = [ ];
+	protected $whereCondition = ' AND ';
 	/**
 	 *
 	 * @param string $table        	
@@ -40,6 +41,22 @@ class MysqlBuild {
 				' limit' => $this->parseLimit (),
 				' lock' => $this->parseLock () 
 		] );
+	}
+	/**
+	 *
+	 * @return \Tian\SqlBuild\MysqlBuild
+	 */
+	public function andWhere() {
+		$this->whereCondition = ' AND ';
+		return $this;
+	}
+	/**
+	 *
+	 * @return \Tian\SqlBuild\MysqlBuild
+	 */
+	public function orWhere() {
+		$this->whereCondition = ' OR ';
+		return $this;
 	}
 	/**
 	 *
@@ -278,7 +295,6 @@ class MysqlBuild {
 	public function reset() {
 		$this->bind = [ ];
 		$this->expr = [ ];
-		$this->whereType = [ ];
 		return $this;
 	}
 	protected function parseTable() {
@@ -298,7 +314,7 @@ class MysqlBuild {
 	}
 	protected function parseWhere() {
 		if ($expr = $this->getBindExprs ( 'where' )) {
-			return " WHERE " . implode ( ' AND ', $expr );
+			return " WHERE " . implode ( $this->whereCondition, $expr );
 		}
 		return '';
 	}
