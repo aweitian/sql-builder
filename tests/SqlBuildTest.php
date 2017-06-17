@@ -1,7 +1,7 @@
 <?php
 class SqlBuildTest extends PHPUnit_Framework_TestCase {
 	public function testSelect() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild( 'tablename' );
 		$demo->bindField ( "id" );
 		$demo->bindField ( "concat('%',:lol,'%')", [ 
 				"lol" => "lol_value" 
@@ -14,7 +14,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		], $demo->getBindValue () );
 	}
 	public function testSelectjoin() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( "id" );
 		$demo->bindField ( "concat('%',:lol,'%')", [ 
 				"lol" => "lol_value" 
@@ -37,7 +37,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		// var_dump($demo->getBindValue());
 	}
 	public function testSelectGrpBy() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( "id" );
 		$demo->bindField ( "concat('%',:lol,'%')", [ 
 				"lol" => "lol_value" 
@@ -71,7 +71,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		], $demo->getBindValue () );
 	}
 	public function testInsert() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( 'aaa', 'insert_aaa_value', ':aaa' );
 		$demo->bindField ( 'bbb', "insert_bbb_value", "concat('aa>',:bbb,'<==')" );
 		$this->assertEquals ( "INSERT INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))", $demo->insert () );
@@ -82,7 +82,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		], $demo->getBindValue () );
 	}
 	public function testReplace() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( 'aaa', "insert_aaa_value", ':aaa' );
 		$demo->bindField ( 'bbb', "insert_bbb_value", "concat('aa>',:bbb,'<==')" );
 		$this->assertEquals ( "REPLACE INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))", $demo->replace () );
@@ -92,7 +92,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 		], $demo->getBindValue () );
 	}
 	public function testUpdate() {
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindField ( 'aaa', "insert_aaa_value",':aaa' );
 		$demo->bindField ( 'bbb', "insert_bbb_value", "concat('aa>',:bbb,'<==')");
 		$demo->bindWhere ( 'sid>:sid', [ 
@@ -110,7 +110,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 	}
 	public function testDelete() {
 		// 单表删除
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename' );
 		$demo->bindWhere ( 'sid > :sid', [ 
 				"sid" => 100 
 		] );
@@ -124,7 +124,7 @@ class SqlBuildTest extends PHPUnit_Framework_TestCase {
 	}
 	public function testDeleteMuti() {
 		// 多表删除,多表删除不能使用ORDER BY 和 LIMIT
-		$demo = new \Tian\SqlBuild\SqlBuild ( 'tablename,tb2' );
+		$demo = new \Tian\SqlBuild\MysqlBuild ( 'tablename,tb2' );
 		$demo->bindUsing ( 'tb2' );
 		$demo->bindWhere ( 'tablename.sid>:sid', [ 
 				"sid" => 100 
