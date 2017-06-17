@@ -339,7 +339,11 @@ class MysqlBuild {
 	}
 	protected function parseLimit() {
 		if ($expr = $this->getBindExprs ( 'limit' )) {
-			return " LIMIT " . current ( $expr );
+			if (count ( $expr ) == 1) {
+				return " LIMIT " . $expr [0];
+			} else if (count ( $expr ) == 2) {
+				return " LIMIT " . $expr [0] . "," . $expr [1];
+			}
 		}
 		return '';
 	}
