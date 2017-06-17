@@ -4,10 +4,9 @@
  * 2017/5/16 17:39:34
  * 数据库 - SQL语句构建类 - 抽象类
  * 这里只是提供常用的SQL构建，复杂的SQL直接使用CONNECTION类
+ * WHERE条件是一个树，条件在叶子节点上，非叶子节点为 OR AND
  */
 namespace Tian\SqlBuild;
-
-use \Tian\Base\Arr as Arr;
 
 class MysqlBuild {
 	protected $table;
@@ -18,12 +17,6 @@ class MysqlBuild {
 	 * @var array
 	 */
 	protected $value = [ ];
-	/**
-	 * 路径 =》 OR | AND
-	 *
-	 * @var array
-	 */
-	protected $whereType = [ ];
 	/**
 	 *
 	 * @param string $table        	
@@ -154,17 +147,25 @@ class MysqlBuild {
 	 * @param array $bind        	
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
-	public function bindWhere($expr, $bind = [], $path = null, $type = 'and') {
-		$name = 'where';
-		if (! isset ( $this->expr [$name] ))
-			$this->expr [$name] = [ ];
-		$v = & Arr::ref ( $this->expr [$name], $path );
-		$t = & Arr::ref ( $this->whereType, $path );
-		$t = $type;
-		$v = $expr;
-		$this->bindValue ( $bind );
-		return $this;
+	public function bindWhere($expr, $bind = []) {
+		return $this->bindExpr ( 'where', $expr, $bind );
 	}
+	// /**
+	// *
+	// * @param string $expr
+	// * @param array $bind
+	// * @return \Tian\SqlBuild\SqlBuild
+	// */
+	// public function bindWhere($expr, $bind = [], $path = 'and') {
+	// $name = 'where';
+	// $path = trim ( $path, '.' );
+	// if (! isset ( $this->expr [$name] ))
+	// $this->expr [$name] = [ ];
+	// $v = & \Tian\Base\Arr::ref ( $this->expr [$name], $path );
+	// $v [$path] = $expr;
+	// $this->bindValue ( $bind );
+	// return $this;
+	// }
 	/**
 	 *
 	 * @param string $expr        	
@@ -252,7 +253,7 @@ class MysqlBuild {
 	/**
 	 * 绑定实参 bindValue( "key", "lol")
 	 * bindValue([])
-	 * 
+	 *
 	 * @param string $name        	
 	 * @param string $key        	
 	 * @param object $val        	

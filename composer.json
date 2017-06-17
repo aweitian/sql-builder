@@ -17,8 +17,7 @@
   ],
   "minimum-stability": "stable",
   "require": {
-    "php": ">=5.4.0",
-    "aweitian/base":"dev-master"
+    "php": ">=5.4.0"
   },
   "require-dev": {
         "phpunit/phpunit": "~5.0"
