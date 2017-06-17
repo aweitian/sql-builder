@@ -8,6 +8,8 @@
  */
 namespace Tian\SqlBuild;
 
+use phpDocumentor\Reflection\Types\Null_;
+
 class MysqlBuild {
 	protected $table;
 	protected $expr = [ ];
@@ -276,7 +278,7 @@ class MysqlBuild {
 	 * @param object $val        	
 	 * @return \Tian\SqlBuild\SqlBuild
 	 */
-	public function bindValue($key, $val) {
+	public function bindValue($key, $val = Null) {
 		if (is_array ( $key ))
 			$this->value = array_merge ( $this->value, $key );
 		else if (is_string ( $key ) || is_numeric ( $key ))
