@@ -8,7 +8,6 @@
  */
 namespace Tian\SqlBuild;
 
-use phpDocumentor\Reflection\Types\Null_;
 
 class MysqlBuild {
 	protected $table;
@@ -29,10 +28,10 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return sql string
+	 * @return string
 	 */
 	public function select() {
-		return strtr ( 'SELECT field FROM table join where groupBy having orderBy limit lock', [ 
+		return strtr ( "SELECT field FROM table join where groupBy having orderBy limit lock", [
 				'field' => $this->parseField (),
 				'table' => $this->parseTable (),
 				' join' => $this->parseJoin (),
@@ -46,7 +45,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return \Tian\SqlBuild\MysqlBuild
+	 * @return $this
 	 */
 	public function andWhere() {
 		$this->whereCondition = ' AND ';
@@ -54,7 +53,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return \Tian\SqlBuild\MysqlBuild
+	 * @return $this
 	 */
 	public function orWhere() {
 		$this->whereCondition = ' OR ';
@@ -62,7 +61,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return sql string
+	 * @return string
 	 */
 	public function delete() {
 		// 判断是单表还是多表
@@ -87,7 +86,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return sql string
+	 * @return string
 	 */
 	public function insert() {
 		return strtr ( "INSERT INTO table (field) VALUES (values)", [ 
@@ -98,7 +97,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return sql string
+	 * @return string
 	 */
 	public function update() {
 		return strtr ( "UPDATE table set where orderBy limit", [ 
@@ -111,7 +110,7 @@ class MysqlBuild {
 	}
 	/**
 	 *
-	 * @return sql string
+	 * @return string
 	 */
 	public function replace() {
 		return strtr ( "REPLACE INTO table (field) VALUES (values)", [ 
@@ -120,13 +119,15 @@ class MysqlBuild {
 				'values' => $this->parseValues () 
 		] );
 	}
-	/**
-	 *
-	 * @param string $field        	
-	 * @param string $value        	
-	 * @param string $values用于INSERT,UPDATE,REPLACE语句中的VALUES，:AAA        	
-	 * @return \Tian\SqlBuild\SqlBuild
-	 */
+
+    /**
+     *
+     * @param string $field
+     * @param bool|string $value
+     * @param bool $values
+     * @return $this
+     * @internal param string $values用于INSERT ,UPDATE,REPLACE语句中的VALUES，:AAA
+     */
 	public function bindField($field, $value = false, $values = false) {
 		if ($values !== false) {
 			$this->bindExpr ( 'values', $values );
@@ -137,14 +138,15 @@ class MysqlBuild {
 		
 		return $this->bindExpr ( 'field', $field );
 	}
-	/**
-	 * 前面必须带:,为了干净的代码
-	 * bindValues(":field",'test")
-	 *
-	 * @param string $field        	
-	 * @param string $value        	
-	 * @return \Tian\SqlBuild\SqlBuild
-	 */
+
+    /**
+     * 前面必须带:,为了干净的代码
+     * bindValues(":field",'test")
+     *
+     * @param string $field
+     * @param bool|string $value
+     * @return $this
+     */
 	public function bindValues($field, $value = false) {
 		if ($value !== false) {
 			$this->bindValue ( $field, $value );
@@ -155,7 +157,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindJoin($expr, $bind = []) {
 		return $this->bindExpr ( 'join', $expr, $bind );
@@ -164,7 +166,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindWhere($expr, $bind = []) {
 		return $this->bindExpr ( 'where', $expr, $bind );
@@ -173,7 +175,7 @@ class MysqlBuild {
 	// *
 	// * @param string $expr
 	// * @param array $bind
-	// * @return \Tian\SqlBuild\SqlBuild
+	// * @return $this
 	// */
 	// public function bindWhere($expr, $bind = [], $path = 'and') {
 	// $name = 'where';
@@ -189,7 +191,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindGroupBy($expr, $bind = []) {
 		return $this->bindExpr ( 'groupBy', $expr, $bind );
@@ -198,7 +200,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindHaving($expr, $bind = []) {
 		return $this->bindExpr ( 'having', $expr, $bind );
@@ -207,7 +209,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindOrderBy($expr, $bind = []) {
 		return $this->bindExpr ( 'orderBy', $expr, $bind );
@@ -216,7 +218,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindLimit($expr, $bind = []) {
 		return $this->bindExpr ( 'limit', $expr, $bind );
@@ -225,7 +227,7 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindLock($expr, $bind = []) {
 		return $this->bindExpr ( 'lock', $expr, $bind );
@@ -237,24 +239,25 @@ class MysqlBuild {
 	 *
 	 * @param string $expr        	
 	 * @param array $bind        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindUsing($expr, $bind = []) {
 		return $this->bindExpr ( 'using', $expr, $bind );
 	}
-	
-	/**
-	 * 第二个参数如果是数组，需要第一个长度为BIND KEY,第二个为BIND VALUE
-	 * 如果第二个是数字或者字符串，则BIND KEY为EXPR,参数二为BIND VALUE
-	 * 其它只绑定表达表，不绑定值
-	 * 绑定表达式 bindExpr("where","concat('%',:key,'%')")
-	 * bind参数为key=>value形式，可以多个
-	 *
-	 *
-	 * @param string $name        	
-	 * @param string $expr        	
-	 * @return \Tian\SqlBuild\SqlBuild
-	 */
+
+    /**
+     * 第二个参数如果是数组，需要第一个长度为BIND KEY,第二个为BIND VALUE
+     * 如果第二个是数字或者字符串，则BIND KEY为EXPR,参数二为BIND VALUE
+     * 其它只绑定表达表，不绑定值
+     * 绑定表达式 bindExpr("where","concat('%',:key,'%')")
+     * bind参数为key=>value形式，可以多个
+     *
+     *
+     * @param string $name
+     * @param string $expr
+     * @param array $bind
+     * @return $this
+     */
 	protected function bindExpr($name, $expr, $bind = []) {
 		if (! isset ( $this->expr [$name] ))
 			$this->expr [$name] = [ ];
@@ -276,7 +279,7 @@ class MysqlBuild {
 	 * @param string $name        	
 	 * @param string $key        	
 	 * @param object $val        	
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function bindValue($key, $val = Null) {
 		if (is_array ( $key ))
@@ -292,7 +295,7 @@ class MysqlBuild {
 	/**
 	 * reset bind values
 	 *
-	 * @return \Tian\SqlBuild\SqlBuild
+	 * @return $this
 	 */
 	public function reset() {
 		$this->bind = [ ];
