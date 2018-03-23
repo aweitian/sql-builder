@@ -21,7 +21,9 @@ $demo->bindJoin ( 'left join tba on tba.sid = tablename.hid' );
 $demo->bindJoin ( 'left join tbb on tba.sid = tbb.sid' );
 $demo->bindWhere ( 'tablename.sid > 100' );
 $demo->bindWhere ( 'tablename.name = \'55\'' );
-//SELECT id,concat('%',:lol,'%'),name as n FROM tablename left join tba on tba.sid = tablename.hid left join tbb on tba.sid = tbb.sid WHERE tablename.sid > 100 AND tablename.name = '55'
+//SELECT id,concat('%',:lol,'%'),name as n FROM tablename 
+//left join tba on tba.sid = tablename.hid left join tbb on tba.sid = tbb.sid 
+//WHERE tablename.sid > 100 AND tablename.name = '55'
 
 $demo = new Crud ( 'tablename' );
 $demo->bindField ( "id" );
