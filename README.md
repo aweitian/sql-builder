@@ -5,7 +5,7 @@
 > composer require aweitian/sql-builder
 >
 
-#### MysqlSelectBuild :
+### select :
 <pre><code>
 $demo = new Crud ( 'tablename' );
 $demo->bindField ( "id" );
@@ -42,7 +42,7 @@ $demo->bindLimit ( '0,100' );
 //GROUP BY tablename.name HAVING cc > 1 LIMIT 0,100
 </code></pre>
 
-#### MysqlInsertBuild:
+### INSERT:
 <code><pre>
 $demo = new Crud ( 'tablename' );
 $demo->bindField ( 'aaa' );
@@ -50,7 +50,7 @@ $demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
 //INSERT INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))
 </code></pre>
 
-#### MysqlReplaceBuild:
+### REPLACE:
 <code><pre>
 $demo = new \Tian\SqlBuild\MysqlReplaceBuild ( 'tablename' );
 $demo->bindField ( 'aaa' );
@@ -58,7 +58,7 @@ $demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
 //REPLACE INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))
 </code></pre>
 
-#### MysqlUpdateBuild:
+### UPDATE:
 <code><pre>
 $demo = new \Tian\SqlBuild\MysqlUpdateBuild ( 'tablename' );
 $demo->bindField ( 'aaa' );
@@ -69,7 +69,7 @@ $demo->bindLimit ( '2' );
 //UPDATE tablename SET aaa=:aaa,bbb=concat('aa>',:bbb,'<==') WHERE sid>100 ORDER BY name desc LIMIT 2
 </code></pre>
 
-#### MysqlDeleteBuild:
+### DELETE:
 <code><pre>
 $demo = new \Tian\SqlBuild\MysqlDeleteBuild ( 'tablename' );
 $demo->bindWhere ( 'sid>100' );
