@@ -4,6 +4,15 @@ use Aw\Build\Mysql\Crud;
 
 class CurdTest extends PHPUnit_Framework_TestCase
 {
+    public function testSelect0()
+    {
+        $demo = new Crud ('tablename');
+        $demo->bindField("id");
+        $demo->bindField("concat('%',:lol,'%')");
+        $demo->bindField("name as n");
+        $demo->bindWhere('qq');
+        $this->assertEquals("SELECT id,concat('%',:lol,'%'),name as n FROM tablename WHERE qq = :qq", $demo->select());
+    }
 
     public function testSelect1()
     {

@@ -192,6 +192,20 @@ class Crud
      */
     public function bindWhere($expr, $bind = array())
     {
+        if (preg_match("/^\w+$/", $expr)) {
+            $expr = "$expr = :$expr";
+        }
+        return $this->bindExpr('where', $expr, $bind);
+    }
+
+    /**
+     *
+     * @param string $expr
+     * @param array $bind
+     * @return $this
+     */
+    public function bindRawWhere($expr, $bind = array())
+    {
         return $this->bindExpr('where', $expr, $bind);
     }
 
