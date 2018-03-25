@@ -303,11 +303,6 @@ class Crud
         return $this;
     }
 
-    public function getBindValue()
-    {
-        return $this->value;
-    }
-
     /**
      * 绑定实参 bindValue( "key", "lol")
      * bindValue([])
@@ -358,11 +353,11 @@ class Crud
 
     protected function parseValues()
     {
-        $ret = $this->getValues();
+        $ret = $this->getBindValues();
         return $ret ? implode(',', $ret) : '';
     }
 
-    protected function getValues()
+    public function getBindValues()
     {
         $values = $this->value;
         $ret = array();
@@ -374,6 +369,11 @@ class Crud
             }
         }
         return $ret;
+    }
+
+    public function getBindFields()
+    {
+        return array_keys($this->getBindValues());
     }
 
     protected function parseJoin()
@@ -437,7 +437,7 @@ class Crud
     protected function parseSet()
     {
         $fields = $this->getBindExprs('field');
-        $values = array_values($this->getValues());
+        $values = array_values($this->getBindValues());
         $ret = array();
 //        var_dump($fields,$values);
         for ($i = 0; $i < count($fields); $i++) {
