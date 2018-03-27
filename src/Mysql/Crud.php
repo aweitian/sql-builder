@@ -48,6 +48,15 @@ class Crud
     }
 
     /**
+     * 在 useCalcFoundRows()  后作用
+     * @return string
+     */
+    public function count()
+    {
+        return 'SELECT FOUND_ROWS()';
+    }
+
+    /**
      *
      * @return string
      */
@@ -378,11 +387,13 @@ class Crud
     {
         $values = $this->value;
         $ret = array();
-        foreach ($this->expr['field'] as $item) {
-            if (!array_key_exists($item, $values)) {
-                $ret[$item] = ":" . $item;
-            } else {
-                $ret[$item] = $values[$item];
+        if (isset($this->expr['field']) && is_array($this->expr['field'])) {
+            foreach ($this->expr['field'] as $item) {
+                if (!array_key_exists($item, $values)) {
+                    $ret[$item] = ":" . $item;
+                } else {
+                    $ret[$item] = $values[$item];
+                }
             }
         }
         return $ret;

@@ -121,6 +121,12 @@ class CurdTest extends PHPUnit_Framework_TestCase
         $demo->bindField("name as n");
         $this->assertEquals("SELECT SQL_CALC_FOUND_ROWS id,concat('%',:lol,'%'),name as n FROM tablename", $demo->select());
     }
+
+    public function testCount()
+    {
+        $demo = new Crud('table');
+        $this->assertEquals('SELECT FOUND_ROWS()', $demo->count());
+    }
 }
 
 
