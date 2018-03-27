@@ -32,6 +32,7 @@ class CurdTest extends PHPUnit_Framework_TestCase
         $this->assertEquals("SELECT id,concat('%',:lol,'%'),name as n FROM tablename", $demo->select());
     }
 
+
     public function testSelect2()
     {
         $demo = new Crud ('tablename');
@@ -109,6 +110,16 @@ class CurdTest extends PHPUnit_Framework_TestCase
         $demo->bindOrderBy('name desc'); // 多表删除中无效
         $demo->bindLimit('2'); // 多表删除中无效
         $this->assertEquals("DELETE FROM tablename,tb2 USING tb2 WHERE tablename.sid>100 AND tablename.sid = tb2.tb1id", $demo->delete());
+    }
+
+    public function testSelect11()
+    {
+        $demo = new Crud ('tablename');
+        $demo->useCalcFoundRows();
+        $demo->bindField("id");
+        $demo->bindField("concat('%',:lol,'%')");
+        $demo->bindField("name as n");
+        $this->assertEquals("SELECT SQL_CALC_FOUND_ROWS id,concat('%',:lol,'%'),name as n FROM tablename", $demo->select());
     }
 }
 

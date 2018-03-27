@@ -21,6 +21,8 @@ class Crud
     protected $value = array();
     protected $whereCondition = ' AND ';
 
+    protected $use_calc_found_rows = false;
+
     /**
      *
      * @param string $table
@@ -31,12 +33,27 @@ class Crud
     }
 
     /**
+     * @return $this
+     */
+    public function useCalcFoundRows()
+    {
+        $this->use_calc_found_rows = true;
+        return $this;
+    }
+
+    public function disableUseCalcFoundRows()
+    {
+        $this->use_calc_found_rows = false;
+        return $this;
+    }
+
+    /**
      *
      * @return string
      */
     public function select()
     {
-        return strtr('SELECT field FROM table join where groupBy having orderBy limit lock', array(
+        return strtr('SELECT' . ($this->use_calc_found_rows ? ' SQL_CALC_FOUND_ROWS' : '') . ' field FROM table join where groupBy having orderBy limit lock', array(
             'field' => $this->parseField(),
             'table' => $this->parseTable(),
             ' join' => $this->parseJoin(),
