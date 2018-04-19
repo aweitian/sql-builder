@@ -168,19 +168,26 @@ class Crud
      * @param string $field
      * @param bool|string $value
      * @param bool $values
+     * @param string $key
      * @return $this
      * @internal param string $values用于INSERT ,UPDATE,REPLACE语句中的VALUES，:AAA
      */
-    public function bindField($field, $value = false, $values = false)
+    public function bindField($field, $value = false, $values = false, $key = null)
     {
         if ($values !== false) {
             $this->bindExpr('values', $values);
         }
-        if ($value !== false) {
-            return $this->bindExpr('field', $field, $value);
+
+        if (is_null($key)) {
+            if (preg_match("/^\w+$/", $field)) {
+                $key = $field;
+            }
         }
 
-        return $this->bindExpr('field', $field);
+        if ($value !== false) {
+            return $this->bindExpr('field', $field, $value, $key);
+        }
+        return $this->bindExpr('field', $field, array(), $key);
     }
 
     /**
@@ -189,105 +196,123 @@ class Crud
      *
      * @param string $field
      * @param bool|string $value
+     * @param string $key
      * @return $this
      */
-    public function bindValues($field, $value = false)
+    public function bindValues($field, $value = false, $key = null)
     {
         if ($value !== false) {
             $this->bindValue($field, $value);
         }
-        return $this->bindExpr('values', $field);
-    }
-
-    /**
-     *
-     * @param string $expr
-     * @param array $bind
-     * @return $this
-     */
-    public function bindJoin($expr, $bind = array())
-    {
-        return $this->bindExpr('join', $expr, $bind);
-    }
-
-    /**
-     *
-     * @param string $expr
-     * @param array $bind
-     * @return $this
-     */
-    public function bindWhere($expr, $bind = array())
-    {
-        if (preg_match("/^\w+$/", $expr)) {
-            $expr = "$expr = :$expr";
+        if (is_null($key)) {
+            if (preg_match("/^\w+$/", $field)) {
+                $key = $field;
+            }
         }
-        return $this->bindExpr('where', $expr, $bind);
+        return $this->bindExpr('values', $field, array(), $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindRawWhere($expr, $bind = array())
+    public function bindJoin($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('where', $expr, $bind);
+        return $this->bindExpr('join', $expr, $bind, $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindGroupBy($expr, $bind = array())
+    public function bindWhere($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('groupBy', $expr, $bind);
+        if (is_null($key)) {
+            if (preg_match("/^\w+$/", $expr)) {
+                $key = $expr;
+                $expr = "$expr = :$expr";
+            }
+        }
+        return $this->bindExpr('where', $expr, $bind, $key);
+    }
+
+
+    /**
+     *
+     * @param string $expr
+     * @param array $bind
+     * @param string $key
+     * @return $this
+     */
+    public function bindRawWhere($expr, $bind = array(), $key = null)
+    {
+        return $this->bindExpr('where', $expr, $bind, $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindHaving($expr, $bind = array())
+    public function bindGroupBy($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('having', $expr, $bind);
+        return $this->bindExpr('groupBy', $expr, $bind, $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindOrderBy($expr, $bind = array())
+    public function bindHaving($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('orderBy', $expr, $bind);
+        return $this->bindExpr('having', $expr, $bind, $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindLimit($expr, $bind = array())
+    public function bindOrderBy($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('limit', $expr, $bind);
+        return $this->bindExpr('orderBy', $expr, $bind, $key);
     }
 
     /**
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindLock($expr, $bind = array())
+    public function bindLimit($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('lock', $expr, $bind);
+        return $this->bindExpr('limit', $expr, $bind, $key);
+    }
+
+    /**
+     *
+     * @param string $expr
+     * @param array $bind
+     * @param string $key
+     * @return $this
+     */
+    public function bindLock($expr, $bind = array(), $key = null)
+    {
+        return $this->bindExpr('lock', $expr, $bind, $key);
     }
 
     /**
@@ -296,11 +321,123 @@ class Crud
      *
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    public function bindUsing($expr, $bind = array())
+    public function bindUsing($expr, $bind = array(), $key = null)
     {
-        return $this->bindExpr('using', $expr, $bind);
+        return $this->bindExpr('using', $expr, $bind, $key);
+    }
+
+
+    /**
+     * @param $name
+     * @param $field
+     * @return bool
+     */
+    protected function unBind($name, $field = null)
+    {
+        if (is_null($field)) {
+            if (isset($this->expr [$name])) {
+                unset($this->expr [$name]);
+                return true;
+            }
+            return false;
+        } else {
+            if (isset($this->expr [$name] [$field])) {
+                unset($this->expr [$name] [$field]);
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindField($field)
+    {
+        return $this->unBind("field", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindValues($field)
+    {
+        return $this->unBind("values", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindJoin($field)
+    {
+        return $this->unBind("join", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindWhere($field)
+    {
+        return $this->unBind("where", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindGroupBy($field)
+    {
+        return $this->unBind("groupBy", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindHaving($field)
+    {
+        return $this->unBind("having", $field);
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindOrderBy($field)
+    {
+        return $this->unBind("orderBy", $field);
+    }
+
+    /**
+     * @return bool
+     */
+    public function unBindLimit()
+    {
+        return $this->unBind("limit");
+    }
+
+    /**
+     * @return bool
+     */
+    public function unBindLock()
+    {
+        return $this->unBind("lock");
+    }
+
+    /**
+     * @param $field
+     * @return bool
+     */
+    public function unBindUsing($field)
+    {
+        return $this->unBind("using", $field);
     }
 
     /**
@@ -314,13 +451,18 @@ class Crud
      * @param string $name
      * @param string $expr
      * @param array $bind
+     * @param string $key
      * @return $this
      */
-    protected function bindExpr($name, $expr, $bind = array())
+    protected function bindExpr($name, $expr, $bind = array(), $key = null)
     {
         if (!isset ($this->expr [$name]))
             $this->expr [$name] = array();
-        $this->expr [$name] [] = $expr;
+        if (is_null($key)) {
+            $this->expr [$name] [] = $expr;
+        } else {
+            $this->expr [$name] [$key] = $expr;
+        }
         if (is_array($bind))
             foreach ($bind as $bk => $bv)
                 $this->bindValue($bk, $bv);
@@ -464,10 +606,9 @@ class Crud
 
     protected function parseSet()
     {
-        $fields = $this->getBindExprs('field');
+        $fields = array_values($this->getBindExprs('field'));
         $values = array_values($this->getBindValues());
         $ret = array();
-//        var_dump($fields,$values);
         for ($i = 0; $i < count($fields); $i++) {
             $ret [] = "{$fields[$i]}=$values[$i]";
         }
