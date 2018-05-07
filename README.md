@@ -44,9 +44,10 @@ $demo->bindLimit ( '0,100' );
 
 ### INSERT:
 <code><pre>
-$demo = new Crud ( 'tablename' );
-$demo->bindField ( 'aaa' );
-$demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
+$demo = new Crud ('tablename');
+$demo->bindField('aaa');
+$demo->bindField('bbb', 'bbb');
+$demo->bindValues("concat('aa>',:bbb,'<==')");
 //INSERT INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))
 </code></pre>
 
@@ -54,7 +55,8 @@ $demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
 <code><pre>
 $demo = new \Tian\SqlBuild\MysqlReplaceBuild ( 'tablename' );
 $demo->bindField ( 'aaa' );
-$demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
+$demo->bindField('bbb', 'bbb');
+$demo->bindValues("concat('aa>',:bbb,'<==')");
 //REPLACE INTO tablename (aaa,bbb) VALUES (:aaa,concat('aa>',:bbb,'<=='))
 </code></pre>
 
@@ -62,7 +64,8 @@ $demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
 <code><pre>
 $demo = new \Tian\SqlBuild\MysqlUpdateBuild ( 'tablename' );
 $demo->bindField ( 'aaa' );
-$demo->bindField ( 'bbb', "concat('aa>',:bbb,'<==')" );
+$demo->bindField ( 'bbb' );
+$demo->bindValues("concat('aa>',:bbb,'<==')");
 $demo->bindWhere ( 'sid>100' );
 $demo->bindOrderBy ( 'name desc' );
 $demo->bindLimit ( '2' );
