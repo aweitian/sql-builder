@@ -11,15 +11,17 @@ namespace Aw\Build\Mysql;
 
 class Crud
 {
+    const DEFAULT_BIND_VALUE = false;
     protected $table;
     protected $expr = array();
     /**
-     * key => val
-     *
+     * 删除的时候，先把要删除的SQL片断中的:AA，：BBB获取，然后删除VALUE中的相应值
+     * aa => 'normal'
+     * bb => null 从数据源填充
      * @var array
      */
     protected $value = array();
-    protected $whereCondition = ' AND ';
+    protected $where_condition = ' AND ';
 
     protected $use_calc_found_rows = false;
 
@@ -45,6 +47,36 @@ class Crud
     {
         $this->use_calc_found_rows = false;
         return $this;
+    }
+
+    /**
+     * 使用GET POST数据填充绑定数据
+     * @param $data_src
+     * @param bool $override 是否覆盖不为FALSE的数据
+     * @param bool $empty_override POST数据为空是否覆盖
+     */
+    public function fillDataSrc($data_src, $override = true, $empty_override = true)
+    {
+        foreach ($this->value as $key => $value) {
+            if (isset($data_src[$key])) {
+                if ($this->value[$key] === self::DEFAULT_BIND_VALUE) {
+                    if ($override) {
+                        if ($data_src[$key] === "") {
+                            if ($empty_override) {
+                                $this->value[$key] = $data_src[$key];
+                            }
+                        } else {
+                            $this->value[$key] = $data_src[$key];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public function getBindValue()
+    {
+        return $this->value;
     }
 
     /**
@@ -81,7 +113,7 @@ class Crud
      */
     public function andWhere()
     {
-        $this->whereCondition = ' AND ';
+        $this->where_condition = ' AND ';
         return $this;
     }
 
@@ -91,7 +123,7 @@ class Crud
      */
     public function orWhere()
     {
-        $this->whereCondition = ' OR ';
+        $this->where_condition = ' OR ';
         return $this;
     }
 
@@ -164,52 +196,64 @@ class Crud
     }
 
     /**
-     *
-     * @param string $field
-     * @param bool|string $value
-     * @param bool $values
-     * @param string $key
-     * @return $this
-     * @internal param string $values用于INSERT ,UPDATE,REPLACE语句中的VALUES，:AAA
+     * @param $str
+     * @param $field
+     * @return array
      */
-    public function bindField($field, $value = false, $values = false, $key = null)
+    protected function parseBindKey($str, $field)
     {
-        if ($values !== false) {
-            $this->bindExpr('values', $values);
+        if (preg_match_all("/:(\w+)/", $str, $m)) {
+            return $m[1];
         }
-
-        if (is_null($key)) {
-            if (preg_match("/^\w+$/", $field)) {
-                $key = $field;
-            }
-        }
-
-        if ($value !== false) {
-            return $this->bindExpr('field', $field, $value, $key);
-        }
-        return $this->bindExpr('field', $field, array(), $key);
+        return array();
     }
 
     /**
-     * 前面必须带:,为了干净的代码
-     * bindValues(":field",'test")
+     * 如果ID存在，使用ID，
+     * 不存在，
+     *      如果FIELD是普通字段名，使用FIELD
+     *      如果FIELD中包含了:KEY形式，使用KEY
+     *      否则使用NULL
+     * @param $field
+     * @param $id
+     * @return mixed
+     */
+    protected function getKeyFromField($field, $id)
+    {
+        if (is_null($id)) {
+            if (preg_match("/^\w+$/", $field)) {
+                $id = $field;
+            } else {
+                if (preg_match_all("/:(\w+)/", $field, $m) == 1) {
+                    $id = $m[1][0];
+                }
+            }
+        }
+        return $id;
+    }
+
+    /**
      *
      * @param string $field
      * @param bool|string $value
      * @param string $key
      * @return $this
      */
-    public function bindValues($field, $value = false, $key = null)
+    public function bindField($field, $key = null, $value = self::DEFAULT_BIND_VALUE)
     {
-        if ($value !== false) {
-            $this->bindValue($field, $value);
-        }
-        if (is_null($key)) {
-            if (preg_match("/^\w+$/", $field)) {
-                $key = $field;
-            }
-        }
-        return $this->bindExpr('values', $field, array(), $key);
+        return $this->bindExpr('field', $field, $value, $key);
+    }
+
+    /**
+     *
+     * @param string $field
+     * @param bool|string $value
+     * @param string $key
+     * @return $this
+     */
+    public function bindValues($field, $key = null, $value = self::DEFAULT_BIND_VALUE)
+    {
+        return $this->bindExpr('values', $field, $value, $key);
     }
 
     /**
@@ -219,7 +263,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindJoin($expr, $bind = array(), $key = null)
+    public function bindJoin($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('join', $expr, $bind, $key);
     }
@@ -231,13 +275,10 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindWhere($expr, $bind = array(), $key = null)
+    public function bindWhere($expr, $key = null, $bind = array())
     {
-        if (is_null($key)) {
-            if (preg_match("/^\w+$/", $expr)) {
-                $key = $expr;
-                $expr = "$expr = :$expr";
-            }
+        if (preg_match("/^\w+$/", $expr)) {
+            $expr = "$expr = :$expr";
         }
         return $this->bindExpr('where', $expr, $bind, $key);
     }
@@ -250,7 +291,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindRawWhere($expr, $bind = array(), $key = null)
+    public function bindRawWhere($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('where', $expr, $bind, $key);
     }
@@ -262,7 +303,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindGroupBy($expr, $bind = array(), $key = null)
+    public function bindGroupBy($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('groupBy', $expr, $bind, $key);
     }
@@ -274,7 +315,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindHaving($expr, $bind = array(), $key = null)
+    public function bindHaving($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('having', $expr, $bind, $key);
     }
@@ -286,7 +327,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindOrderBy($expr, $bind = array(), $key = null)
+    public function bindOrderBy($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('orderBy', $expr, $bind, $key);
     }
@@ -298,7 +339,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindLimit($expr, $bind = array(), $key = null)
+    public function bindLimit($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('limit', $expr, $bind, $key);
     }
@@ -310,7 +351,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindLock($expr, $bind = array(), $key = null)
+    public function bindLock($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('lock', $expr, $bind, $key);
     }
@@ -324,7 +365,7 @@ class Crud
      * @param string $key
      * @return $this
      */
-    public function bindUsing($expr, $bind = array(), $key = null)
+    public function bindUsing($expr, $key = null, $bind = array())
     {
         return $this->bindExpr('using', $expr, $bind, $key);
     }
@@ -340,12 +381,16 @@ class Crud
         if (is_null($field)) {
             if (isset($this->expr [$name])) {
                 unset($this->expr [$name]);
+
                 return true;
             }
             return false;
         } else {
             if (isset($this->expr [$name] [$field])) {
                 unset($this->expr [$name] [$field]);
+                if (isset($this->value[$field])) {
+                    unset($this->value [$field]);
+                }
                 return true;
             }
             return false;
@@ -451,23 +496,30 @@ class Crud
      * @param string $name
      * @param string $expr
      * @param array $bind
-     * @param string $key
+     * @param string $id
      * @return $this
      */
-    protected function bindExpr($name, $expr, $bind = array(), $key = null)
+    protected function bindExpr($name, $expr, $bind = array(), $id = null)
     {
+        $id = $this->getKeyFromField($expr, $id);
+        $bind_keys = $this->parseBindKey($expr, $expr);
+        if (count($bind_keys) == 1) {
+            $this->bindValue($bind_keys[0], is_array($bind) && array_key_exists($bind_keys[0], $bind) ?
+                $bind[$bind_keys[0]] : ($bind ? $bind : self::DEFAULT_BIND_VALUE));
+        } else {
+            foreach ($bind_keys as $bind_key) {
+                $this->bindValue($bind_key, is_array($bind) && array_key_exists($bind_key, $bind) ?
+                    $bind[$bind_key] : ($bind ? $bind : self::DEFAULT_BIND_VALUE));
+            }
+        }
+
         if (!isset ($this->expr [$name]))
             $this->expr [$name] = array();
-        if (is_null($key)) {
+        if (is_null($id)) {
             $this->expr [$name] [] = $expr;
         } else {
-            $this->expr [$name] [$key] = $expr;
+            $this->expr [$name] [$id] = $expr;
         }
-        if (is_array($bind))
-            foreach ($bind as $bk => $bv)
-                $this->bindValue($bk, $bv);
-        else if (is_string($bind) || is_numeric($bind))
-            $this->bindValue($expr, $bind);
         return $this;
     }
 
@@ -475,7 +527,7 @@ class Crud
      * 绑定实参 bindValue( "key", "lol")
      * bindValue([])
      *
-     * @param string $key
+     * @param string|array $key
      * @param object $val
      * @return $this
      * @internal param string $name
@@ -504,7 +556,7 @@ class Crud
     {
         $this->value = array();
         $this->expr = array();
-        $this->whereCondition = ' AND ';
+        $this->where_condition = ' AND ';
         return $this;
     }
 
@@ -519,31 +571,27 @@ class Crud
         return $expr ? implode(',', $expr) : '*';
     }
 
-    protected function parseValues()
+    protected function parseValues($strict = false)
     {
-        $ret = $this->getBindValues();
-        return $ret ? implode(',', $ret) : '';
-    }
-
-    public function getBindValues()
-    {
-        $values = $this->value;
-        $ret = array();
-        if (isset($this->expr['field']) && is_array($this->expr['field'])) {
-            foreach ($this->expr['field'] as $item) {
-                if (!array_key_exists($item, $values)) {
-                    $ret[$item] = ":" . $item;
-                } else {
-                    $ret[$item] = $values[$item];
-                }
+        $ret = $this->getBindExprs('values');
+        if ($strict) {
+            return $ret ? implode(',', $ret) : '';
+        }
+        $fields = $this->getBindExprs('field');
+        $vals = array();
+        foreach ($fields as $field) {
+            if (!array_key_exists($field, $ret)) {
+                $vals[$field] = ":$field";
+            } else {
+                $vals[$field] = $ret[$field];
             }
         }
-        return $ret;
+        return $vals ? implode(',', $vals) : '';
     }
 
     public function getBindFields()
     {
-        return array_keys($this->getBindValues());
+        return array_keys($this->value);
     }
 
     protected function parseJoin()
@@ -555,7 +603,7 @@ class Crud
     protected function parseWhere()
     {
         if ($expr = $this->getBindExprs('where')) {
-            return " WHERE " . implode($this->whereCondition, $expr);
+            return " WHERE " . implode($this->where_condition, $expr);
         }
         return '';
     }
@@ -588,9 +636,9 @@ class Crud
     {
         if ($expr = $this->getBindExprs('limit')) {
             if (count($expr) == 1) {
-                return " LIMIT " . $expr [0];
+                return " LIMIT " . current($expr);
             } else if (count($expr) == 2) {
-                return " LIMIT " . $expr [0] . "," . $expr [1];
+                return " LIMIT " . current($expr) . "," . end($expr);
             }
         }
         return '';
@@ -606,16 +654,17 @@ class Crud
 
     protected function parseSet()
     {
-        $fields = array_values($this->getBindExprs('field'));
-        $values = array_values($this->getBindValues());
-        $ret = array();
-        for ($i = 0; $i < count($fields); $i++) {
-            $ret [] = "{$fields[$i]}=$values[$i]";
+        $ret = $this->getBindExprs('values');
+        $fields = $this->getBindExprs('field');
+        $vals = array();
+        foreach ($fields as $field) {
+            if (!array_key_exists($field, $ret)) {
+                $vals[$field] = "$field=:$field";
+            } else {
+                $vals[$field] = $field . "=" . $ret[$field];
+            }
         }
-        if ($ret) {
-            return 'SET ' . implode(',', $ret);
-        }
-        return '';
+        return $vals ? 'SET ' . implode(',', $vals) : '';
     }
 
     protected function parseUsing()

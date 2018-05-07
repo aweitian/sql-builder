@@ -9,7 +9,7 @@ class CurdUnbindTest extends PHPUnit_Framework_TestCase
         $demo = new Crud ('tablename');
         $demo->bindField("id");
         $demo->bindField("concat('%',:lol,'%')");
-        $demo->bindField("name as n", false, false, "n");
+        $demo->bindField("name as n", "n");
         $this->assertEquals("SELECT id,concat('%',:lol,'%'),name as n FROM tablename", $demo->select());
 
         $demo->unBindField("id");
