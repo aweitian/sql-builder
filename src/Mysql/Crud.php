@@ -278,7 +278,7 @@ class Crud
     public function bindWhere($expr, $key = null, $bind = array())
     {
         if (preg_match("/^\w+$/", $expr)) {
-            $expr = "$expr = :$expr";
+            $expr = "`$expr` = :$expr";
         }
         return $this->bindExpr('where', $expr, $bind, $key);
     }
@@ -568,6 +568,11 @@ class Crud
     protected function parseField()
     {
         $expr = $this->getBindExprs('field');
+        foreach ($expr as &$item) {
+            if (preg_match("/^\w+$/", $item)) {
+                $item = "`" . $item . "`";
+            }
+        }
         return $expr ? implode(',', $expr) : '*';
     }
 
@@ -659,9 +664,9 @@ class Crud
         $vals = array();
         foreach ($fields as $field) {
             if (!array_key_exists($field, $ret)) {
-                $vals[$field] = "$field=:$field";
+                $vals[$field] = "`$field`=:$field";
             } else {
-                $vals[$field] = $field . "=" . $ret[$field];
+                $vals[$field] = "`" . $field . "`=" . $ret[$field];
             }
         }
         return $vals ? 'SET ' . implode(',', $vals) : '';
