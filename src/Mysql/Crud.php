@@ -562,6 +562,9 @@ class Crud
 
     protected function parseTable()
     {
+        if (preg_match("/^\w+$/", $this->table)) {
+            return "`{$this->table}`";
+        }
         return $this->table;
     }
 
